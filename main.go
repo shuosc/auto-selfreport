@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"gopkg.in/gomail.v2"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"net/url"
 	"path"
 	"runtime/debug"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -99,6 +101,8 @@ func login(username, password string) {
 		if resp.StatusCode == 200 {
 			return
 		}
+	case 200:
+		panic("用户名或密码错误")
 	default:
 		panic(fmt.Sprint("POST ", loginURL, " returns ", resp.Status))
 	}
@@ -135,8 +139,25 @@ func login(username, password string) {
 	client.Jar.SetCookies(resp.Request.URL, resp.Cookies())
 }
 
-func sendMail(content string) {
+func sendMail(to, content string) (err error) {
+	//定义邮箱服务器连接信息，如果是阿里邮箱 pass填密码，qq邮箱填授权码
+	mailConn := map[string]string{
+		"user": "dayreport@mzz.pub",
+		"pass": "GoodGoodStudyDayDayReport!",
+		"host": "smtp.mxhichina.com",
+		"port": "465",
+	}
 
+	port, _ := strconv.Atoi(mailConn["port"]) //转换端口类型为int
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", "<"+mailConn["user"]+">") //这种方式可以添加别名，即“XD Game”， 也可以直接用<code>m.SetHeader("From",mailConn["user"])</code> 读者可以自行实验下效果
+	m.SetHeader("To", to)                         //发送给多个用户
+	m.SetHeader("Subject", "每日一报")                //设置邮件主题
+	m.SetBody("text/plain", content)              //设置邮件正文
+	d := gomail.NewDialer(mailConn["host"], port, mailConn["user"], mailConn["pass"])
+	err = d.DialAndSend(m)
+	return err
 }
 
 func getViewParam(body io.Reader) map[string]string {
@@ -162,18 +183,9 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           "不在校",
 		"p1$GuoNei":            "国内",
-
-
-		"p1$DangQSZD":       "其他",             //TODO: 当天所在地，必须在选项内，上海、湖北、其他
-		"p1$ddlSheng$Value": "四川",             //TODO: 当天所在地，必须在选项内
-		"p1$ddlShi$Value":   "广元市",            //TODO: 当天所在地，必须在选项内
-		"p1$ddlXian$Value":  "利州区",            //TODO: 当天所在地，必须在选项内
-		"p1$XiangXDZ":       "四川省广元市利州区宝轮镇",   //TODO: 国内详细地址
-		"p1$QueZHZJC$Value": "否",              //TODO: 是否曾与确诊患者密切接触，必须在选项内，是、否
-		"p1$QueZHZJC":       "否",              //TODO: 是否在返校或返沪途中，必须在选项内，是、否
-		"p1$DaoXQLYGJ":      "",               //TODO: 到校前旅游过的国家
-		"p1$DaoXQLYCS":      "",               //TODO: 到校前旅游过的城市
-		"p1$Address2":       "中国四川省成都市锦江区督院街", //TODO: 通过ip地址获取的具体位置，我们可以填一个差不多的具体位置
+	}
+	for k, v := range info {
+		m[k] = v
 	}
 
 	b, _ := base64.StdEncoding.DecodeString(`eyJwMV9CYW9TUlEiOnsiVGV4dCI6IjIwMjAtMDItMDkifSwicDFfRGFuZ1FTVFpLIjp7IkZfSXRlbXMiOltbIuiJr+WlvSIsIuiJr+WlvSIsMV0sWyLkuI3pgIIiLCLkuI3pgIIiLDFdXSwiU2VsZWN0ZWRWYWx1ZSI6IuiJr+WlvSJ9LCJwMV9aaGVuZ1podWFuZyI6eyJIaWRkZW4iOnRydWUsIkZfSXRlbXMiOltbIuaEn+WGkiIsIuaEn+WGkiIsMV0sWyLlkrPll70iLCLlkrPll70iLDFdLFsi5Y+R54OtIiwi5Y+R54OtIiwxXV0sIlNlbGVjdGVkVmFsdWVBcnJheSI6W119LCJwMV9aYWlYaWFvIjp7IkZfSXRlbXMiOltbIuS4jeWcqOagoSIsIuS4jeWcqOagoSIsMV0sWyLlrp3lsbEiLCLlrp3lsbHmoKHljLoiLDFdLFsi5bu26ZW/Iiwi5bu26ZW/5qCh5Yy6IiwxXSxbIuWYieWumiIsIuWYieWumuagoeWMuiIsMV0sWyLmlrDpl7jot68iLCLmlrDpl7jot6/moKHljLoiLDFdXSwiU2VsZWN0ZWRWYWx1ZSI6IuS4jeWcqOagoSJ9LCJwMV9HdW9OZWkiOnsiRl9JdGVtcyI6W1si5Zu95YaFIiwi5Zu95YaFIiwxXSxbIuWbveWkliIsIuWbveWkliIsMV1dLCJTZWxlY3RlZFZhbHVlIjoi5Zu95YaFIn0sInAxX0RhbmdRU1pEIjp7IlJlcXVpcmVkIjp0cnVlLCJTZWxlY3RlZFZhbHVlIjoi5YW25LuWIiwiRl9JdGVtcyI6W1si5LiK5rW3Iiwi5LiK5rW3IiwxXSxbIua5luWMlyIsIua5luWMlyIsMV0sWyLlhbbku5YiLCLlhbbku5YiLDFdXX0sInAxX2RkbFNoZW5nIjp7IkZfSXRlbXMiOltbIi0xIiwi6YCJ5oup55yB5Lu9IiwxLCIiLCIiXSxbIuWMl+S6rCIsIuWMl+S6rCIsMSwiIiwiIl0sWyLlpKnmtKUiLCLlpKnmtKUiLDEsIiIsIiJdLFsi5LiK5rW3Iiwi5LiK5rW3IiwxLCIiLCIiXSxbIumHjeW6hiIsIumHjeW6hiIsMSwiIiwiIl0sWyLmsrPljJciLCLmsrPljJciLDEsIiIsIiJdLFsi5bGx6KW/Iiwi5bGx6KW/IiwxLCIiLCIiXSxbIui+veWugSIsIui+veWugSIsMSwiIiwiIl0sWyLlkInmnpciLCLlkInmnpciLDEsIiIsIiJdLFsi6buR6b6Z5rGfIiwi6buR6b6Z5rGfIiwxLCIiLCIiXSxbIuaxn+iLjyIsIuaxn+iLjyIsMSwiIiwiIl0sWyLmtZnmsZ8iLCLmtZnmsZ8iLDEsIiIsIiJdLFsi5a6J5b69Iiwi5a6J5b69IiwxLCIiLCIiXSxbIuemj+W7uiIsIuemj+W7uiIsMSwiIiwiIl0sWyLmsZ/opb8iLCLmsZ/opb8iLDEsIiIsIiJdLFsi5bGx5LicIiwi5bGx5LicIiwxLCIiLCIiXSxbIuays+WNlyIsIuays+WNlyIsMSwiIiwiIl0sWyLmuZbljJciLCLmuZbljJciLDEsIiIsIiJdLFsi5rmW5Y2XIiwi5rmW5Y2XIiwxLCIiLCIiXSxbIuW5v+S4nCIsIuW5v+S4nCIsMSwiIiwiIl0sWyLmtbfljZciLCLmtbfljZciLDEsIiIsIiJdLFsi5Zub5bedIiwi5Zub5bedIiwxLCIiLCIiXSxbIui0teW3niIsIui0teW3niIsMSwiIiwiIl0sWyLkupHljZciLCLkupHljZciLDEsIiIsIiJdLFsi6ZmV6KW/Iiwi6ZmV6KW/IiwxLCIiLCIiXSxbIueUmOiCgyIsIueUmOiCgyIsMSwiIiwiIl0sWyLpnZLmtbciLCLpnZLmtbciLDEsIiIsIiJdLFsi5YaF6JKZ5Y+kIiwi5YaF6JKZ5Y+kIiwxLCIiLCIiXSxbIuW5v+ilvyIsIuW5v+ilvyIsMSwiIiwiIl0sWyLopb/ol48iLCLopb/ol48iLDEsIiIsIiJdLFsi5a6B5aSPIiwi5a6B5aSPIiwxLCIiLCIiXSxbIuaWsOeWhiIsIuaWsOeWhiIsMSwiIiwiIl0sWyLpppnmuK8iLCLpppnmuK8iLDEsIiIsIiJdLFsi5r6z6ZeoIiwi5r6z6ZeoIiwxLCIiLCIiXSxbIuWPsOa5viIsIuWPsOa5viIsMSwiIiwiIl1dLCJTZWxlY3RlZFZhbHVlQXJyYXkiOlsi5Zub5bedIl19LCJwMV9kZGxTaGkiOnsiRW5hYmxlZCI6dHJ1ZSwiRl9JdGVtcyI6W1siLTEiLCLpgInmi6nluIIiLDEsIiIsIiJdLFsi5oiQ6YO95biCIiwi5oiQ6YO95biCIiwxLCIiLCIiXSxbIuiHqui0oeW4giIsIuiHqui0oeW4giIsMSwiIiwiIl0sWyLmlIDmnp3oirHluIIiLCLmlIDmnp3oirHluIIiLDEsIiIsIiJdLFsi5rO45bee5biCIiwi5rO45bee5biCIiwxLCIiLCIiXSxbIuW+t+mYs+W4giIsIuW+t+mYs+W4giIsMSwiIiwiIl0sWyLnu7XpmLPluIIiLCLnu7XpmLPluIIiLDEsIiIsIiJdLFsi5bm/5YWD5biCIiwi5bm/5YWD5biCIiwxLCIiLCIiXSxbIumBguWugeW4giIsIumBguWugeW4giIsMSwiIiwiIl0sWyLlhoXmsZ/luIIiLCLlhoXmsZ/luIIiLDEsIiIsIiJdLFsi5LmQ5bGx5biCIiwi5LmQ5bGx5biCIiwxLCIiLCIiXSxbIuWNl+WFheW4giIsIuWNl+WFheW4giIsMSwiIiwiIl0sWyLnnInlsbHluIIiLCLnnInlsbHluIIiLDEsIiIsIiJdLFsi5a6c5a6+5biCIiwi5a6c5a6+5biCIiwxLCIiLCIiXSxbIuW5v+WuieW4giIsIuW5v+WuieW4giIsMSwiIiwiIl0sWyLovr7lt57luIIiLCLovr7lt57luIIiLDEsIiIsIiJdLFsi6ZuF5a6J5biCIiwi6ZuF5a6J5biCIiwxLCIiLCIiXSxbIuW3tOS4reW4giIsIuW3tOS4reW4giIsMSwiIiwiIl0sWyLotYTpmLPluIIiLCLotYTpmLPluIIiLDEsIiIsIiJdLFsi6Zi/5Z2d6JeP5peP576M5peP6Ieq5rK75beeIiwi6Zi/5Z2d6JeP5peP576M5peP6Ieq5rK75beeIiwxLCIiLCIiXSxbIueUmOWtnOiXj+aXj+iHquayu+W3niIsIueUmOWtnOiXj+aXj+iHquayu+W3niIsMSwiIiwiIl0sWyLlh4nlsbHlvZ3ml4/oh6rmsrvlt54iLCLlh4nlsbHlvZ3ml4/oh6rmsrvlt54iLDEsIiIsIiJdXSwiU2VsZWN0ZWRWYWx1ZUFycmF5IjpbIuW5v+WFg+W4giJdfSwicDFfZGRsWGlhbiI6eyJFbmFibGVkIjp0cnVlLCJGX0l0ZW1zIjpbWyItMSIsIumAieaLqeWOv+WMuiIsMSwiIiwiIl0sWyLliKnlt57ljLoiLCLliKnlt57ljLoiLDEsIiIsIiJdLFsi5YWD5Z2d5Yy6Iiwi5YWD5Z2d5Yy6IiwxLCIiLCIiXSxbIuacneWkqeWMuiIsIuacneWkqeWMuiIsMSwiIiwiIl0sWyLpnZLlt53ljr8iLCLpnZLlt53ljr8iLDEsIiIsIiJdLFsi5pe66IuN5Y6/Iiwi5pe66IuN5Y6/IiwxLCIiLCIiXSxbIuWJkemYgeWOvyIsIuWJkemYgeWOvyIsMSwiIiwiIl0sWyLoi43muqrljr8iLCLoi43muqrljr8iLDEsIiIsIiJdXSwiU2VsZWN0ZWRWYWx1ZUFycmF5IjpbIuWIqeW3nuWMuiJdfSwicDFfWGlhbmdYRFoiOnsiTGFiZWwiOiLlm73lhoXor6bnu4blnLDlnYAiLCJUZXh0Ijoi5Zub5bed55yB5bm/5YWD5biC5Yip5bee5Yy65a6d6L2u6ZWHIn0sInAxX1F1ZVpIWkpDIjp7IkZfSXRlbXMiOltbIuaYryIsIuaYryIsMSwiIiwiIl0sWyLlkKYiLCLlkKYiLDEsIiIsIiJdXSwiU2VsZWN0ZWRWYWx1ZUFycmF5IjpbIuWQpiJdfSwicDFfQ2VuZ0ZXSCI6eyJMYWJlbCI6IjIwMjDlubQx5pyIMTDml6XlkI7mmK/lkKblnKjmuZbljJfpgJfnlZnov4cifSwicDFfQ2VuZ0ZXSF9SaVFpIjp7IkhpZGRlbiI6dHJ1ZX0sInAxX0NlbmdGV0hfQmVpWmh1Ijp7IkhpZGRlbiI6dHJ1ZX0sInAxX0ppZUNodSI6eyJMYWJlbCI6IjAx5pyIMjbml6Xoh7MwMuaciDA55pel5piv5ZCm5LiO5p2l6Ieq5rmW5YyX5Y+R54Ot5Lq65ZGY5a+G5YiH5o6l6KemIn0sInAxX0ppZUNodV9SaVFpIjp7IkhpZGRlbiI6dHJ1ZX0sInAxX0ppZUNodV9CZWlaaHUiOnsiSGlkZGVuIjp0cnVlfSwicDFfVHVKV0giOnsiTGFiZWwiOiIwMeaciDI25pel6IezMDLmnIgwOeaXpeaYr+WQpuS5mOWdkOWFrOWFseS6pOmAmumAlOW+hOa5luWMlyJ9LCJwMV9UdUpXSF9SaVFpIjp7IkhpZGRlbiI6dHJ1ZX0sInAxX1R1SldIX0JlaVpodSI6eyJIaWRkZW4iOnRydWV9LCJwMV9KaWFSZW4iOnsiTGFiZWwiOiIwMeaciDI25pel6IezMDLmnIgwOeaXpeWutuS6uuaYr+WQpuacieWPkeeDreetieeXh+eKtiJ9LCJwMV9KaWFSZW5fQmVpWmh1Ijp7IkhpZGRlbiI6dHJ1ZX0sInAxIjp7IklGcmFtZUF0dHJpYnV0ZXMiOnt9fX0=`)
@@ -201,7 +213,7 @@ func getViewParam(body io.Reader) map[string]string {
 
 }
 
-func dayReport() {
+func dayReport() (msg string) {
 	var resp *http.Response
 	err := retry(func() (err error) {
 		resp, err = client.Get(dayReportURL)
@@ -242,24 +254,42 @@ func dayReport() {
 			s = s[:right]
 		}
 	}
-	log.Println(s)
+	return s
 }
 
 func main() {
 	defer func() {
 		if e := recover(); e != nil {
 			var content string
-			log.Println(e)
 			switch e := e.(type) {
 			case error:
 				content = e.Error()
+			case string:
+				content = e
+			case fmt.Stringer:
+				content = e.String()
 			default:
 				content = "未知错误"
 			}
-			sendMail(content)
+			err := retry(func() (err error) {
+				err = sendMail(email, content)
+				return
+			}, 3)
+			if err != nil {
+				log.Println(err)
+			}
 			log.Println(string(debug.Stack()))
+			log.Println(content)
 		}
 	}()
-	login("", "")
-	dayReport()
+	login(username, password)
+	msg := dayReport()
+	log.Println(msg)
+	err := retry(func() (err error) {
+		err = sendMail(email, msg)
+		return
+	}, 3)
+	if err != nil {
+		panic(err)
+	}
 }

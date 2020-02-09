@@ -166,19 +166,23 @@ func getViewParam(body io.Reader) map[string]string {
 	rand.Seed(time.Now().UnixNano())
 	doc, _ := goquery.NewDocumentFromReader(body)
 	html, _ := doc.Html()
+	zx := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`)
+	gn := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`)
 	sz := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`)
 	sheng := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`)
 	shi := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`)
 	xian := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`)
 	xx := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`)
 	jc := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`)
+	zxMatch := zx.FindStringSubmatch(html)
+	gnMatch := gn.FindStringSubmatch(html)
 	szMatch := sz.FindStringSubmatch(html)
 	shengMatch := sheng.FindStringSubmatch(html)
 	shiMatch := shi.FindStringSubmatch(html)
 	xianMatch := xian.FindStringSubmatch(html)
 	xxMatch := xx.FindStringSubmatch(html)
 	jcMatch := jc.FindStringSubmatch(html)
-	F_State := fmt.Sprintf(template, szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	F_State := fmt.Sprintf(template, zxMatch[1], gnMatch[1], szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -198,8 +202,8 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$TuJWH_RiQi":        "",
 		"p1$TuJWH_BeiZhu":      "",
 		"p1$JiaRen_BeiZhu":     "",
-		"p1$ZaiXiao":           "不在校",
-		"p1$GuoNei":            "国内",
+		"p1$ZaiXiao":           zxMatch[1],
+		"p1$GuoNei":            gnMatch[1],
 		"p1$DangQSZD":          szMatch[1],
 		"p1$ddlSheng$Value":    shengMatch[1],
 		"p1$ddlShi$Value":      shiMatch[2],

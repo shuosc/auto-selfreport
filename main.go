@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
-	"path"
 	"regexp"
 	"runtime/debug"
 	"strconv"
@@ -45,17 +44,6 @@ func retry(f func() (err error), maxTimes int) (err error) {
 	}
 }
 
-func getRedirectURL(resp *http.Response) string {
-	p := resp.Header.Get("location")
-	if strings.HasPrefix(p, "/") {
-		p = path.Clean(p)
-	}
-	if strings.HasPrefix(p, ".") {
-		p = path.Clean(path.Join(path.Dir(resp.Request.URL.Path), p))
-	}
-	return resp.Request.URL.Scheme + "://" + resp.Request.URL.Host + p
-}
-
 func login(username, password string) {
 	var resp *http.Response
 	err := retry(func() (err error) {
@@ -70,7 +58,7 @@ func login(username, password string) {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	client.Jar.SetCookies(resp.Request.URL, resp.Cookies())
+	//client.Jar.SetCookies(resp.Request.URL, resp.Cookies())
 	data := url.Values{}
 	data.Set("username", username)
 	data.Set("password", password)
@@ -89,9 +77,8 @@ func login(username, password string) {
 	}
 	defer resp.Body.Close()
 	switch resp.StatusCode {
-	case 301, 302:
 	case 500:
-		//500可能也登录成功了
+		//由于没有cookie，500可能登录成功了
 		err = retry(func() (err error) {
 			resp, err = client.Get(homeURL)
 			return err
@@ -108,56 +95,23 @@ func login(username, password string) {
 	default:
 		panic(fmt.Sprint("POST ", loginURL, " returns ", resp.Status))
 	}
-	//redirect to /oauth/authorize
-	u := getRedirectURL(resp)
-	err = retry(func() (err error) {
-		resp, err = client.Get(u)
-		return err
-	}, 5)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	switch resp.StatusCode {
-	case 301, 302:
-	default:
-		panic(fmt.Sprint("GET ", u, " returns ", resp.Status))
-	}
-	//redirect to selfreport.shu.edu.cn/LoginSSO.aspx and set cookies
-	u = getRedirectURL(resp)
-	err = retry(func() (err error) {
-		resp, err = client.Get(u)
-		return err
-	}, 5)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	switch resp.StatusCode {
-	case 301, 302:
-	default:
-		panic(fmt.Sprint("GET ", u, " returns ", resp.Status))
-	}
-	client.Jar.SetCookies(resp.Request.URL, resp.Cookies())
 }
 
 func sendMail(to, content string) (err error) {
-	//定义邮箱服务器连接信息，如果是阿里邮箱 pass填密码，qq邮箱填授权码
-	mailConn := map[string]string{
+	inf := map[string]string{
 		"user": "dayreport@mzz.pub",
 		"pass": "GoodGoodStudyDayDayReport!",
 		"host": "smtp.mxhichina.com",
 		"port": "465",
 	}
 
-	port, _ := strconv.Atoi(mailConn["port"]) //转换端口类型为int
-
+	port, _ := strconv.Atoi(inf["port"])
 	m := gomail.NewMessage()
-	m.SetHeader("From", "<"+mailConn["user"]+">") //这种方式可以添加别名，即“XD Game”， 也可以直接用<code>m.SetHeader("From",mailConn["user"])</code> 读者可以自行实验下效果
-	m.SetHeader("To", to)                         //发送给多个用户
-	m.SetHeader("Subject", "每日一报")                //设置邮件主题
-	m.SetBody("text/plain", content)              //设置邮件正文
-	d := gomail.NewDialer(mailConn["host"], port, mailConn["user"], mailConn["pass"])
+	m.SetHeader("From", inf["user"])
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", "每日一报")
+	m.SetBody("text/plain", content)
+	d := gomail.NewDialer(inf["host"], port, inf["user"], inf["pass"])
 	err = d.DialAndSend(m)
 	return err
 }
@@ -166,23 +120,15 @@ func getViewParam(body io.Reader) map[string]string {
 	rand.Seed(time.Now().UnixNano())
 	doc, _ := goquery.NewDocumentFromReader(body)
 	html, _ := doc.Html()
-	zx := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`)
-	gn := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`)
-	sz := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`)
-	sheng := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`)
-	shi := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`)
-	xian := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`)
-	xx := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`)
-	jc := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`)
-	zxMatch := zx.FindStringSubmatch(html)
-	gnMatch := gn.FindStringSubmatch(html)
-	szMatch := sz.FindStringSubmatch(html)
-	shengMatch := sheng.FindStringSubmatch(html)
-	shiMatch := shi.FindStringSubmatch(html)
-	xianMatch := xian.FindStringSubmatch(html)
-	xxMatch := xx.FindStringSubmatch(html)
-	jcMatch := jc.FindStringSubmatch(html)
-	date:=time.Now().Format("2006-01-02")
+	zxMatch := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	gnMatch := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	shengMatch := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
+	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	date := time.Now().Format("2006-01-02")
 	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
@@ -265,30 +211,35 @@ func dayReport() (msg string) {
 	return s
 }
 
+func handleRecover(msg interface{}) {
+	var content string
+	switch msg := msg.(type) {
+	case error:
+		content = msg.Error()
+	case string:
+		content = msg
+	case fmt.Stringer:
+		content = msg.String()
+	default:
+		content = "未知错误"
+	}
+	cfg := config.Get()
+	err := retry(func() (err error) {
+		err = sendMail(cfg.Email, content)
+		return
+	}, 3)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(string(debug.Stack()))
+	log.Println(content)
+}
+
 func main() {
 	cfg := config.Get()
 	defer func() {
-		if e := recover(); e != nil {
-			var content string
-			switch e := e.(type) {
-			case error:
-				content = e.Error()
-			case string:
-				content = e
-			case fmt.Stringer:
-				content = e.String()
-			default:
-				content = "未知错误"
-			}
-			err := retry(func() (err error) {
-				err = sendMail(cfg.Email, content)
-				return
-			}, 3)
-			if err != nil {
-				log.Println(err)
-			}
-			log.Println(string(debug.Stack()))
-			log.Println(content)
+		if msg := recover(); msg != nil {
+			handleRecover(msg)
 		}
 	}()
 	login(cfg.Username, cfg.Password)

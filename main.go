@@ -233,7 +233,16 @@ func dayReport() {
 	}
 	defer resp.Body.Close()
 	b, _ := ioutil.ReadAll(resp.Body)
-	log.Println(string(b))
+	s := string(b)
+	left := strings.Index(s, "alert(")
+	if left >= 0 {
+		s = s[left:]
+		right := strings.Index(s, ");")
+		if right >= 0 {
+			s = s[:right]
+		}
+	}
+	log.Println(s)
 }
 
 func main() {

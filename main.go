@@ -182,7 +182,8 @@ func getViewParam(body io.Reader) map[string]string {
 	xianMatch := xian.FindStringSubmatch(html)
 	xxMatch := xx.FindStringSubmatch(html)
 	jcMatch := jc.FindStringSubmatch(html)
-	F_State := fmt.Sprintf(template, zxMatch[1], gnMatch[1], szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	date:=time.Now().Format("2006-01-02")
+	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -190,7 +191,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"__EVENTARGUMENT":      "",
 		"__VIEWSTATEGENERATOR": doc.Find("#__VIEWSTATEGENERATOR").AttrOr("value", ""),
 		"p1$ChengNuo":          "p1_ChengNuo",
-		"p1$BaoSRQ":            time.Now().Format("2006-01-02"),
+		"p1$BaoSRQ":            date,
 		"p1$DangQSTZK":         "良好",
 		"p1$TiWen":             fmt.Sprintf("%.1f", float64(362+rand.Int()%7)/10),
 		"F_TARGET":             "p1_ctl00_btnSubmit",

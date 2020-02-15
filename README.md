@@ -8,6 +8,6 @@ Add secrets at Repo Settings-Secrets
 - `SHU_PASSWORD`: 一卡通密码
 - `EMAIL`: 用于接收通知的邮箱
 
-and job will run at 1a.m. every day.
+and job will run at 9 a.m. every day.
 
 

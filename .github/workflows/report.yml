@@ -15,4 +15,4 @@ jobs:
         chmod +x auto-self-report
         
     - name: Run job
-      run: ./auto-self-report -u ${{ secrets.SHU_USERNAME }} -p ${{ secrets.SHU_PASSWORD }} -e kastnerorz@gmail.com
+      run: ./auto-self-report -u ${{ secrets.SHU_USERNAME }} -p ${{ secrets.SHU_PASSWORD }} -e ${{ secrets.EMAIL }}

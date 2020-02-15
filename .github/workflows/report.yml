@@ -1,7 +1,7 @@
-name: Go
+name: Auto Self Report
 on: 
   schedule:
-    - cron: "50 4 * * *"
+    - cron: "0 17 * * *"
 jobs:
 
   report:

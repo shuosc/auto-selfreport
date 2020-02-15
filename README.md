@@ -1,7 +1,5 @@
 # Auto Self Report
 
-> 未测试过国外
-
 ## Usage
 
 Add secrets at Repo Settings-Secrets

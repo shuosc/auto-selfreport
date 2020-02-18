@@ -11,7 +11,7 @@ jobs:
 
     - name: Get executable
       run: |
-        curl -s https://api.github.com/repos/mzz2017/auto-selfreport/releases/latest | grep "auto-selfreport_linux_amd64" | cut -d : -f 2,3 | tr -d \" | wget -O auto-self-report -qi -
+        curl -L -o auto-self-report https://github.com/mzz2017/auto-selfreport/releases/latest/download/auto-selfreport_linux_amd64
         chmod +x auto-self-report
         
     - name: Run job

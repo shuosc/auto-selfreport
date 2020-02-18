@@ -122,14 +122,14 @@ func getViewParam(body io.Reader) map[string]string {
 	html, _ := doc.Html()
 	zxMatch := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	gnMatch := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	shengMatch := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
-	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	//szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	shengMatch := regexp.MustCompile(`f9_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f10_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f12_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
+	jcMatch := regexp.MustCompile(`f13_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
-	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], szMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -151,16 +151,16 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           zxMatch[1],
 		"p1$GuoNei":            gnMatch[1],
-		"p1$DangQSZD":          szMatch[1],
-		"p1$ddlSheng$Value":    shengMatch[1],
-		"p1$ddlShi$Value":      shiMatch[2],
-		"p1$ddlXian$Value":     xianMatch[2],
-		"p1$XiangXDZ":          xxMatch[1],
-		"p1$QueZHZJC$Value":    jcMatch[1],
-		"p1$QueZHZJC":          "否", //返沪
-		"p1$DaoXQLYGJ":         "",  //旅游国家
-		"p1$DaoXQLYCS":         "",  //旅游城市
-		"p1$Address2":          "中国",
+		//"p1$DangQSZD":          szMatch[1],
+		"p1$ddlSheng$Value": shengMatch[1],
+		"p1$ddlShi$Value":   shiMatch[2],
+		"p1$ddlXian$Value":  xianMatch[2],
+		"p1$XiangXDZ":       xxMatch[1],
+		"p1$QueZHZJC$Value": jcMatch[1],
+		"p1$QueZHZJC":       "否", //返沪
+		"p1$DaoXQLYGJ":      "",  //旅游国家
+		"p1$DaoXQLYCS":      "",  //旅游城市
+		"p1$Address2":       "中国",
 	}
 
 	return m

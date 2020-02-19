@@ -20,7 +20,7 @@ func initFunc() {
 		//FlagIgnoreUnknown: true,
 	})
 	if params.Username == "" || params.Password == "" {
-		log.Fatal("Either USERNAME or PASSWORD can not be empty! See help by command line flag --help.")
+		log.Fatal("Neither USERNAME nor PASSWORD can be empty! See help by command line flag --help.")
 	}
 	if err != nil {
 		if err.Error() != "unexpected word while parsing flags: '-test.v'" {

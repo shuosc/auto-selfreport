@@ -98,6 +98,9 @@ func login(username, password string) {
 }
 
 func sendMail(to, content string) (err error) {
+	if len(strings.trimSpace(to)) == 0{
+		return
+	}
 	inf := map[string]string{
 		"user": "dayreport@mzz.pub",
 		"pass": "GoodGoodStudyDayDayReport!",

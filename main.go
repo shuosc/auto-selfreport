@@ -142,7 +142,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$ChengNuo":          "p1_ChengNuo",
 		"p1$BaoSRQ":            date,
 		"p1$DangQSTZK":         "良好",
-		"p1$TiWen":             fmt.Sprintf("%.1f", float64(362+rand.Int()%7)/10),
+		"p1$TiWen":             fmt.Sprintf("%.1f", float64(362+rand.Int()%5)/10),
 		"F_TARGET":             "p1_ctl00_btnSubmit",
 		"p1_Collapsed":         "false",
 		"p1$CengFWH_RiQi":      "",

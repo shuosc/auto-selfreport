@@ -133,6 +133,9 @@ func getViewParam(body io.Reader) map[string]string {
 	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
 	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
 	ssMatch := regexp.MustCompile(`f32_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	if len(ssMatch)<2 {
+		ssMatch=[]string{"","绿色"}
+	}
 	date := time.Now().Format("2006-01-02")
 	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], jcMatch[1], ssMatch[1])
 	m := map[string]string{

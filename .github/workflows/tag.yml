@@ -1,5 +1,8 @@
-name: Go
-on: [push, pull_request]
+name: Tag
+on:
+ push:
+   tags:
+     - v*
 jobs:
 
   build:

@@ -133,14 +133,16 @@ func getViewParam(body io.Reader) map[string]string {
 	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
 	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
 	ssMatch := regexp.MustCompile(`f32_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	if len(tzMatch) < 2 {
-		tzMatch = []string{"","否"}
-	}
-	if len(ssMatch) < 2 {
-		ssMatch = []string{"","绿色"}
+	var F_State string
+	var shanghai bool
+	if (len(tzMatch) < 2 || len(ssMatch) < 2) {
+		shanghai = false
+		F_State = fmt.Sprintf(template_0, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	} else {
+		shanghai = true
+		F_State = fmt.Sprintf(template_1, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], jcMatch[1], ssMatch[1])
 	}
 	date := time.Now().Format("2006-01-02")
-	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], jcMatch[1], ssMatch[1])
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -166,16 +168,19 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$ddlSheng$Value": shengMatch[1],
 		"p1$ddlShi$Value":   shiMatch[2],
 		"p1$ddlXian$Value":  xianMatch[2],
-		"p1$TongZWDLH":      tzMatch[1],
 		"p1$XiangXDZ":       xxMatch[1],
 		"p1$QueZHZJC$Value": jcMatch[1],
 		"p1$QueZHZJC":       "否", //返沪
 		"p1$DaoXQLYGJ":      "",  //旅游国家
 		"p1$DaoXQLYCS":      "",  //旅游城市
-		"p1$SuiSM":          ssMatch[1],
 		"p1$Address2":       "中国",
+		"p1_SuiSMSM_Collapsed": "false",
+		"p1_Collapsed":         "false"
 	}
-
+	if shanghai {
+		m["p1$TongZWDLH"] = tzMatch[1]
+		m["p1$SuiSM"] = ssMatch[1]
+	}
 	return m
 
 }

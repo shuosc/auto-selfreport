@@ -98,7 +98,7 @@ func login(username, password string) {
 }
 
 func sendMail(to, content string) (err error) {
-	if len(strings.trimSpace(to)) == 0{
+	if len(strings.TrimSpace(to)) == 0{
 		return
 	}
 	inf := map[string]string{
@@ -129,10 +129,20 @@ func getViewParam(body io.Reader) map[string]string {
 	shengMatch := regexp.MustCompile(`f9_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
 	shiMatch := regexp.MustCompile(`f10_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
 	xianMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f12_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
-	jcMatch := regexp.MustCompile(`f13_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	tzMatch := regexp.MustCompile(`f12_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
+	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	ssMatch := regexp.MustCompile(`f32_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
-	F_State := fmt.Sprintf(template, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	var F_State string
+	var shanghai bool
+	if (len(tzMatch) < 2 || len(ssMatch) < 2) {
+		shanghai = false
+		F_State = fmt.Sprintf(template_0, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+	} else {
+		shanghai = true
+		F_State = fmt.Sprintf(template_1, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], jcMatch[1], ssMatch[1])
+	}
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -164,8 +174,12 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$DaoXQLYGJ":      "",  //旅游国家
 		"p1$DaoXQLYCS":      "",  //旅游城市
 		"p1$Address2":       "中国",
+		"p1_SuiSMSM_Collapsed": "false",
 	}
-
+	if shanghai {
+		m["p1$TongZWDLH"] = tzMatch[1]
+		m["p1$SuiSM"] = ssMatch[1]
+	}
 	return m
 
 }

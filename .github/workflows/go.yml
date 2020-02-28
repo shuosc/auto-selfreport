@@ -13,14 +13,16 @@ jobs:
         go-version: 1.13
       id: go
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
-
     - name: Prepare gox
       run: go get github.com/mitchellh/gox
       
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+      
     - name: Build
-      run: $/HOME/go/bin/gox
+      run: |
+        export PATH=$PATH:$HOME/go/bin
+        gox
         
     - name: GH Release
       uses: softprops/action-gh-release@v0.1.5

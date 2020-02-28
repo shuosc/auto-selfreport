@@ -28,7 +28,7 @@ jobs:
         gox
         
     - name: GH Release
-      uses: softprops/action-gh-release@v0.1.5
+      uses: softprops/action-gh-release@v1
       with:
         draft: true
         files: |
@@ -51,6 +51,8 @@ jobs:
           auto-selfreport_openbsd_amd64
           auto-selfreport_windows_386.exe
           auto-selfreport_windows_amd64.exe
+      env:
+       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
           
           

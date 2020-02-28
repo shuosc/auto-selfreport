@@ -16,5 +16,52 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
+    - name: Prepare gox
+      run: go get github.com/mitchellh/gox
+      
     - name: Build
-      run: go build -v .
+      run: $/HOME/go/bin/gox
+        
+    - name: GH Release
+      uses: softprops/action-gh-release@v0.1.5
+      with:
+        draft: true
+        files: |
+          auto-selfreport_darwin_amd64
+          auto-selfreport_freebsd_386
+          auto-selfreport_freebsd_amd64
+          auto-selfreport_freebsd_arm
+          auto-selfreport_linux_386
+          auto-selfreport_linux_amd64
+          auto-selfreport_linux_arm
+          auto-selfreport_linux_mips
+          auto-selfreport_linux_mips64
+          auto-selfreport_linux_mips64le
+          auto-selfreport_linux_mipsle
+          auto-selfreport_linux_s390x
+          auto-selfreport_netbsd_386
+          auto-selfreport_netbsd_amd64
+          auto-selfreport_netbsd_arm
+          auto-selfreport_openbsd_386
+          auto-selfreport_openbsd_amd64
+          auto-selfreport_windows_386.exe
+          auto-selfreport_windows_amd64.exe
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+

@@ -2,7 +2,7 @@
 
 ## Usage
 
-Add secrets at Repo Settings-Secrets
+After forking, add secrets at your repository's <a href="settings/secrets">Settings-Secrets</a>
 
 - `SHU_USERNAME`: 一卡通账号
 - `SHU_PASSWORD`: 一卡通密码

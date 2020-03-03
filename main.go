@@ -251,7 +251,6 @@ func handleRecover(msg interface{}) {
 	}
 	log.Println(string(debug.Stack()))
 	log.Println(content)
-	os.Exit(1)
 }
 
 func main() {
@@ -259,6 +258,7 @@ func main() {
 	defer func() {
 		if msg := recover(); msg != nil {
 			handleRecover(msg)
+			os.Exit(1)
 		}
 	}()
 	login(cfg.Username, cfg.Password)

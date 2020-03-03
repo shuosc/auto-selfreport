@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
+	"os"
 	"regexp"
 	"runtime/debug"
 	"strconv"
@@ -257,6 +258,7 @@ func main() {
 	defer func() {
 		if msg := recover(); msg != nil {
 			handleRecover(msg)
+			os.Exit(1)
 		}
 	}()
 	login(cfg.Username, cfg.Password)

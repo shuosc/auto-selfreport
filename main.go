@@ -250,6 +250,7 @@ func handleRecover(msg interface{}) {
 	}
 	log.Println(string(debug.Stack()))
 	log.Println(content)
+	os.Exit(1)
 }
 
 func main() {

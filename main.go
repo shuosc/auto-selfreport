@@ -99,7 +99,8 @@ func login(username, password string) {
 }
 
 func sendMail(to, content string) (err error) {
-	if len(strings.TrimSpace(to)) == 0{
+	to = strings.TrimSpace(to)
+	if to == "" || to == "true" {
 		return
 	}
 	inf := map[string]string{

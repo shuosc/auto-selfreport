@@ -128,13 +128,13 @@ func getViewParam(body io.Reader) map[string]string {
 	zxMatch := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	gnMatch := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	//szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	shengMatch := regexp.MustCompile(`f9_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f10_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	tzMatch := regexp.MustCompile(`f12_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f13_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
-	jcMatch := regexp.MustCompile(`f14_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	ssMatch := regexp.MustCompile(`f32_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	shengMatch := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	tzMatch := regexp.MustCompile(`f13_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f14_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
+	jcMatch := regexp.MustCompile(`f15_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	ssMatch := regexp.MustCompile(`f33_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
 	var F_State string
 	var shanghai bool
@@ -166,6 +166,8 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           zxMatch[1],
 		"p1$GuoNei":            gnMatch[1],
+		"p1$ddlGuoJia$Value":   "-1",
+		"p1$ddlGuoJia":         "选择国家",
 		//"p1$DangQSZD":          szMatch[1],
 		"p1$ddlSheng$Value": shengMatch[1],
 		"p1$ddlShi$Value":   shiMatch[2],

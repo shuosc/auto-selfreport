@@ -166,7 +166,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           zxMatch[1],
 		"p1$GuoNei":            gnMatch[1],
-		"p1$ddlGuoJia$Value":   -1,
+		"p1$ddlGuoJia$Value":   "-1",
 		"p1$ddlGuoJia":         "选择国家",
 		//"p1$DangQSZD":          szMatch[1],
 		"p1$ddlSheng$Value": shengMatch[1],

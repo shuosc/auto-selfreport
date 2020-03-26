@@ -175,6 +175,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$XiangXDZ":       xxMatch[1],
 		"p1$QueZHZJC$Value": jcMatch[1],
 		"p1$QueZHZJC":       "否", //返沪
+		"p1$DangRGL":	     "否", //是否隔离
 		"p1$DaoXQLYGJ":      "",  //旅游国家
 		"p1$DaoXQLYCS":      "",  //旅游城市
 		"p1$Address2":       "中国",

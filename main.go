@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"gopkg.in/gomail.v2"
-	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -121,30 +120,53 @@ func sendMail(to, content string) (err error) {
 	return err
 }
 
-func getViewParam(body io.Reader) map[string]string {
+func getViewParam() map[string]string {
+	var resp *http.Response
+	err := retry(func() (err error) {
+		resp, err = client.Get(fmt.Sprintf(historyURL, time.Now().AddDate(0,0,-1).Format("2006-01-02")))
+		return err
+	}, 5)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body := resp.Body
 	rand.Seed(time.Now().UnixNano())
 	doc, _ := goquery.NewDocumentFromReader(body)
 	html, _ := doc.Html()
-	zxMatch := regexp.MustCompile(`f7_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	gnMatch := regexp.MustCompile(`f8_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	//szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	zxMatch := regexp.MustCompile(`f6_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	// gnMatch := regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	// szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	shengMatch := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f11_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f12_state={.+?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	tzMatch := regexp.MustCompile(`f13_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f14_state={.+?"Text":"(.+?)"`).FindStringSubmatch(html)
-	jcMatch := regexp.MustCompile(`f15_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	ssMatch := regexp.MustCompile(`f33_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f11_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f12_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	tzMatch := regexp.MustCompile(`f13_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f14_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	// jcMatch := regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	ssMatch := regexp.MustCompile(`f36_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
 	var F_State string
 	var shanghai bool
 	if (len(tzMatch) < 2 || len(ssMatch) < 2) {
 		shanghai = false
-		F_State = fmt.Sprintf(template_0, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], jcMatch[1])
+		F_State = fmt.Sprintf(template_0, date, zxMatch[1], "国内", shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], "否")
 	} else {
 		shanghai = true
-		F_State = fmt.Sprintf(template_1, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], jcMatch[1], ssMatch[1])
+		F_State = fmt.Sprintf(template_1, date, zxMatch[1], "国内", shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], "否", ssMatch[1])
 	}
+
+	err = retry(func() (err error) {
+		resp, err = client.Get(dayReportURL)
+		return err
+	}, 5)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	body = resp.Body
+	doc, _ = goquery.NewDocumentFromReader(body)
+	html, _ = doc.Html()
+
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
 		"__VIEWSTATE":          doc.Find("#__VIEWSTATE").AttrOr("value", ""),
@@ -165,7 +187,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$TuJWH_BeiZhu":      "",
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           zxMatch[1],
-		"p1$GuoNei":            gnMatch[1],
+		"p1$GuoNei":            "国内",
 		"p1$ddlGuoJia$Value":   "-1",
 		"p1$ddlGuoJia":         "选择国家",
 		//"p1$DangQSZD":          szMatch[1],
@@ -173,7 +195,7 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$ddlShi$Value":   shiMatch[2],
 		"p1$ddlXian$Value":  xianMatch[2],
 		"p1$XiangXDZ":       xxMatch[1],
-		"p1$QueZHZJC$Value": jcMatch[1],
+		"p1$QueZHZJC$Value": "否",
 		"p1$QueZHZJC":       "否", //返沪
 		"p1$DangRGL":	     "否", //是否隔离
 		"p1$DaoXQLYGJ":      "",  //旅游国家
@@ -191,20 +213,12 @@ func getViewParam(body io.Reader) map[string]string {
 
 func dayReport() (msg string) {
 	var resp *http.Response
-	err := retry(func() (err error) {
-		resp, err = client.Get(dayReportURL)
-		return err
-	}, 5)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	m := getViewParam(resp.Body)
+	m := getViewParam()
 	data := url.Values{}
 	for k, v := range m {
 		data.Set(k, v)
 	}
-	err = retry(func() (err error) {
+	err := retry(func() (err error) {
 		req, _ := http.NewRequest("POST", dayReportURL, strings.NewReader(data.Encode()))
 		req.Header.Set("Referer", dayReportURL)
 		req.Header.Set("Accept", "*/*")

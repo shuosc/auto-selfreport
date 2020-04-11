@@ -137,13 +137,13 @@ func getViewParam() map[string]string {
 	zxMatch := regexp.MustCompile(`f6_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	// gnMatch := regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	// szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	shengMatch := regexp.MustCompile(`f10_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f11_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f12_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	tzMatch := regexp.MustCompile(`f13_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f14_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	shengMatch := regexp.MustCompile(`f12_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f13_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f14_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	tzMatch := regexp.MustCompile(`f15_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f16_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
 	// jcMatch := regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	ssMatch := regexp.MustCompile(`f36_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	ssMatch := regexp.MustCompile(`f38_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
 	var F_State string
 	var shanghai bool
@@ -187,6 +187,8 @@ func getViewParam() map[string]string {
 		"p1$TuJWH_BeiZhu":      "",
 		"p1$JiaRen_BeiZhu":     "",
 		"p1$ZaiXiao":           zxMatch[1],
+		"p1$MingTDX":           "不到校",
+		"p1$MingTJC":           "否",
 		"p1$GuoNei":            "国内",
 		"p1$ddlGuoJia$Value":   "-1",
 		"p1$ddlGuoJia":         "选择国家",

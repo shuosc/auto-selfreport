@@ -246,6 +246,9 @@ func dayReport() (msg string) {
 			s = s[:right]
 		}
 	}
+	if (!strings.Contains(s, "提交成功")) {
+		panic(s)
+	}
 	return s
 }
 

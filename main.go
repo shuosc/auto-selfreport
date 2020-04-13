@@ -123,7 +123,7 @@ func sendMail(to, content string) (err error) {
 func getViewParam() map[string]string {
 	var resp *http.Response
 	err := retry(func() (err error) {
-		resp, err = client.Get(fmt.Sprintf(historyURL, time.Now().AddDate(0,0,-1).Format("2006-01-02")))
+		resp, err = client.Get(dayReportURL)
 		return err
 	}, 5)
 	if err != nil {
@@ -134,25 +134,25 @@ func getViewParam() map[string]string {
 	rand.Seed(time.Now().UnixNano())
 	doc, _ := goquery.NewDocumentFromReader(body)
 	html, _ := doc.Html()
-	zxMatch := regexp.MustCompile(`f6_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	// gnMatch := regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	zxMatch := regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	gnMatch := regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	// szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	shengMatch := regexp.MustCompile(`f12_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f13_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f14_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	tzMatch := regexp.MustCompile(`f15_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f16_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	shengMatch := regexp.MustCompile(`f16_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	shiMatch := regexp.MustCompile(`f17_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	xianMatch := regexp.MustCompile(`f18_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	tzMatch := regexp.MustCompile(`f19_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	xxMatch := regexp.MustCompile(`f20_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
 	// jcMatch := regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	ssMatch := regexp.MustCompile(`f38_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	ssMatch := regexp.MustCompile(`f43_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	date := time.Now().Format("2006-01-02")
 	var F_State string
 	var shanghai bool
 	if (len(tzMatch) < 2 || len(ssMatch) < 2) {
 		shanghai = false
-		F_State = fmt.Sprintf(template_0, date, zxMatch[1], "国内", shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], "否")
+		F_State = fmt.Sprintf(template_0, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], "否")
 	} else {
 		shanghai = true
-		F_State = fmt.Sprintf(template_1, date, zxMatch[1], "国内", shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], "否", ssMatch[1])
+		F_State = fmt.Sprintf(template_1, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], "否", ssMatch[1])
 	}
 
 	err = retry(func() (err error) {
@@ -163,9 +163,9 @@ func getViewParam() map[string]string {
 		panic(err)
 	}
 	defer resp.Body.Close()
-	body = resp.Body
-	doc, _ = goquery.NewDocumentFromReader(body)
-	html, _ = doc.Html()
+	// body = resp.Body
+	// doc, _ = goquery.NewDocumentFromReader(body)
+	// html, _ = doc.Html()
 
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
@@ -189,7 +189,11 @@ func getViewParam() map[string]string {
 		"p1$ZaiXiao":           zxMatch[1],
 		"p1$MingTDX":           "不到校",
 		"p1$MingTJC":           "否",
-		"p1$GuoNei":            "国内",
+		"p1$BanChe_1$Value":    "0",
+		"p1$BanChe_1":          "不需要乘班车",
+		"p1$BanChe_2$Value":    "0",
+		"p1$BanChe_2":          "不需要乘班车",
+		"p1$GuoNei":            gnMatch[1],
 		"p1$ddlGuoJia$Value":   "-1",
 		"p1$ddlGuoJia":         "选择国家",
 		//"p1$DangQSZD":          szMatch[1],

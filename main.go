@@ -174,6 +174,8 @@ func getViewParam(body io.Reader) map[string]string {
 		"p1$ddlXian$Value":  xianMatch[2],
 		"p1$XiangXDZ":       xxMatch[1],
 		"p1$QueZHZJC$Value": jcMatch[1],
+                "p1$SuiSM":          "绿色",       // 随申码颜色
+                "p1$LvMa14Days":     "是",    // 截止今天是否连续14天健康码为绿色
 		"p1$QueZHZJC":       "否", //返沪
 		"p1$DangRGL":	     "否", //是否隔离
 		"p1$DaoXQLYGJ":      "",  //旅游国家

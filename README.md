@@ -2,6 +2,16 @@
 
 ## Usage
 
+### Crontab
+```bash
+$ crontab -e
+
+# Auto Self Report
+0 9 * * * mkdir ~/auto-selfreport && curl -L -o ~/auto-selfreport/report https://github.com/mzz2017/auto-selfreport/releases/latest/download/auto-selfreport_linux_amd64 && chmod +x ~/auto-selfreport/report && ~/auto-selfreport/report -u username -p passcode -e email
+```
+
+### GitHub Action
+
 After forking, add secrets at your own repository's <a href="../../settings/secrets">Settings-Secrets</a>
 
 - `SHU_USERNAME`: 一卡通账号

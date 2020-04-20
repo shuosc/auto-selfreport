@@ -201,7 +201,7 @@ func getViewParam() map[string]string {
 		"p1$ddlShi$Value":   shiMatch[2],
 		"p1$ddlXian$Value":  xianMatch[2],
 		"p1$XiangXDZ":       xxMatch[1],
-		"p1$QueZHZJC$Value": jcMatch[1],
+		"p1$QueZHZJC$Value": "否",
 		"p1$SuiSM":          "绿色",       // 随申码颜色
 		"p1$LvMa14Days":     "是",    // 截止今天是否连续14天健康码为绿色
 		"p1$QueZHZJC":       "否", //返沪

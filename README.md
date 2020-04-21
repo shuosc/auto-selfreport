@@ -7,7 +7,7 @@
 $ crontab -e
 
 # Auto Self Report
-0 9 * * * mkdir ~/auto-selfreport && curl -L -o ~/auto-selfreport/report https://github.com/mzz2017/auto-selfreport/releases/latest/download/auto-selfreport_linux_amd64 && chmod +x ~/auto-selfreport/report && ~/auto-selfreport/report -u username -p passcode -e email
+0 9 * * * mkdir -p ~/auto-selfreport && curl -L -o ~/auto-selfreport/report https://github.com/mzz2017/auto-selfreport/releases/latest/download/auto-selfreport_linux_amd64 && chmod +x ~/auto-selfreport/report && ~/auto-selfreport/report -u your-username -p your-password -e your-email
 ```
 
 ### GitHub Action

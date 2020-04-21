@@ -120,6 +120,54 @@ func sendMail(to, content string) (err error) {
 	return err
 }
 
+type Match struct {
+	zxMatch     []string
+	gnMatch     []string
+	guojiaMatch []string
+	shengMatch  []string
+	shiMatch    []string
+	xianMatch   []string
+	tzMatch     []string
+	xxMatch     []string
+	ssMatch     []string
+}
+
+func NewMatch(html string) (m *Match) {
+	m = new(Match)
+	m.zxMatch = regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.gnMatch = regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	//m.szMatch = regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.guojiaMatch = regexp.MustCompile(`f15_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shengMatch = regexp.MustCompile(`f16_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shiMatch = regexp.MustCompile(`f17_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.xianMatch = regexp.MustCompile(`f18_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.tzMatch = regexp.MustCompile(`f19_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.xxMatch = regexp.MustCompile(`f20_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	//m.jcMatch = regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.ssMatch = regexp.MustCompile(`f43_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	return
+}
+
+func generateFState(m *Match, Riqi string) (F_State string, area Area) {
+	area = AreaDefault
+	switch {
+	case m.gnMatch[1] == "国外":
+		area = AreaGuowai
+	case len(m.tzMatch) >= 2 && len(m.ssMatch) >= 2:
+		area = AreaShanghai
+	}
+	switch area {
+	case AreaShanghai:
+		F_State = fmt.Sprintf(templateShanghai, Riqi, m.zxMatch[1], m.gnMatch[1], m.shengMatch[1], m.shiMatch[1], m.shiMatch[2], m.xianMatch[1], m.xianMatch[2], m.tzMatch[1], m.xxMatch[1], "否", m.ssMatch[1])
+	case AreaGuowai:
+		F_State = fmt.Sprintf(templateGuowai, Riqi, m.guojiaMatch[1], m.xxMatch[1])
+	default:
+		F_State = fmt.Sprintf(template, Riqi, m.zxMatch[1], m.gnMatch[1], m.shengMatch[1], m.shiMatch[1], m.shiMatch[2], m.xianMatch[1], m.xianMatch[2], m.xxMatch[1], "否")
+	}
+	F_State = strings.TrimSpace(F_State)
+	return
+}
+
 func getViewParam() map[string]string {
 	var resp *http.Response
 	err := retry(func() (err error) {
@@ -134,38 +182,13 @@ func getViewParam() map[string]string {
 	rand.Seed(time.Now().UnixNano())
 	doc, _ := goquery.NewDocumentFromReader(body)
 	html, _ := doc.Html()
-	zxMatch := regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	gnMatch := regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	// szMatch := regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	shengMatch := regexp.MustCompile(`f16_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	shiMatch := regexp.MustCompile(`f17_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	xianMatch := regexp.MustCompile(`f18_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	tzMatch := regexp.MustCompile(`f19_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	xxMatch := regexp.MustCompile(`f20_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
-	// jcMatch := regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	ssMatch := regexp.MustCompile(`f43_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	date := time.Now().Format("2006-01-02")
-	var F_State string
-	var shanghai bool
-	if (len(tzMatch) < 2 || len(ssMatch) < 2) {
-		shanghai = false
-		F_State = fmt.Sprintf(template_0, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], xxMatch[1], "否")
-	} else {
-		shanghai = true
-		F_State = fmt.Sprintf(template_1, date, zxMatch[1], gnMatch[1], shengMatch[1], shiMatch[1], shiMatch[2], xianMatch[1], xianMatch[2], tzMatch[1], xxMatch[1], "否", ssMatch[1])
-	}
 
-	err = retry(func() (err error) {
-		resp, err = client.Get(dayReportURL)
-		return err
-	}, 5)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-	// body = resp.Body
-	// doc, _ = goquery.NewDocumentFromReader(body)
-	// html, _ = doc.Html()
+	match := NewMatch(html)
+
+	Riqi := time.Now().Format("2006-01-02")
+	Tiwen := fmt.Sprintf("%.1f", float64(362+rand.Int()%3)/10)
+
+	F_State, area := generateFState(match, Riqi)
 
 	m := map[string]string{
 		"F_State":              base64.StdEncoding.EncodeToString([]byte(F_State)),
@@ -174,9 +197,9 @@ func getViewParam() map[string]string {
 		"__EVENTARGUMENT":      "",
 		"__VIEWSTATEGENERATOR": doc.Find("#__VIEWSTATEGENERATOR").AttrOr("value", ""),
 		"p1$ChengNuo":          "p1_ChengNuo",
-		"p1$BaoSRQ":            date,
+		"p1$BaoSRQ":            Riqi,
 		"p1$DangQSTZK":         "良好",
-		"p1$TiWen":             fmt.Sprintf("%.1f", float64(362+rand.Int()%5)/10),
+		"p1$TiWen":             Tiwen,
 		"F_TARGET":             "p1_ctl00_btnSubmit",
 		"p1_Collapsed":         "false",
 		"p1$CengFWH_RiQi":      "",
@@ -186,34 +209,41 @@ func getViewParam() map[string]string {
 		"p1$TuJWH_RiQi":        "",
 		"p1$TuJWH_BeiZhu":      "",
 		"p1$JiaRen_BeiZhu":     "",
-		"p1$ZaiXiao":           zxMatch[1],
+		"p1$ZaiXiao":           match.zxMatch[1],
 		"p1$MingTDX":           "不到校",
 		"p1$MingTJC":           "否",
 		"p1$BanChe_1$Value":    "0",
 		"p1$BanChe_1":          "不需要乘班车",
 		"p1$BanChe_2$Value":    "0",
 		"p1$BanChe_2":          "不需要乘班车",
-		"p1$GuoNei":            gnMatch[1],
+		"p1$GuoNei":            match.gnMatch[1],
 		"p1$ddlGuoJia$Value":   "-1",
 		"p1$ddlGuoJia":         "选择国家",
 		//"p1$DangQSZD":          szMatch[1],
-		"p1$ddlSheng$Value": shengMatch[1],
-		"p1$ddlShi$Value":   shiMatch[2],
-		"p1$ddlXian$Value":  xianMatch[2],
-		"p1$XiangXDZ":       xxMatch[1],
-		"p1$QueZHZJC$Value": "否",
-		"p1$SuiSM":          "绿色",       // 随申码颜色
-		"p1$LvMa14Days":     "是",    // 截止今天是否连续14天健康码为绿色
-		"p1$QueZHZJC":       "否", //返沪
-		"p1$DangRGL":	     "否", //是否隔离
-		"p1$DaoXQLYGJ":      "",  //旅游国家
-		"p1$DaoXQLYCS":      "",  //旅游城市
-		"p1$Address2":       "中国",
+		"p1$ddlSheng$Value":    match.shengMatch[1],
+		"p1$ddlShi$Value":      match.shiMatch[2],
+		"p1$ddlXian$Value":     match.xianMatch[2],
+		"p1$XiangXDZ":          match.xxMatch[1],
+		"p1$QueZHZJC$Value":    "否",
+		"p1$SuiSM":             "绿色", // 随申码颜色
+		"p1$LvMa14Days":        "是",  // 截止今天是否连续14天健康码为绿色
+		"p1$QueZHZJC":          "否",  //返沪
+		"p1$DangRGL":           "否",  //是否隔离
+		"p1$DaoXQLYGJ":         "",   //旅游国家
+		"p1$DaoXQLYCS":         "",   //旅游城市
+		"p1$Address2":          "中国",
 		"p1_SuiSMSM_Collapsed": "false",
+		"p1_GeLSM_Collapsed":   "false",
+		"p1_BanCSM_Collapsed":  "false",
 	}
-	if shanghai {
-		m["p1$TongZWDLH"] = tzMatch[1]
-		m["p1$SuiSM"] = ssMatch[1]
+	switch area {
+	case AreaShanghai:
+		m["p1$TongZWDLH"] = match.tzMatch[1]
+		m["p1$SuiSM"] = match.ssMatch[1]
+	case AreaGuowai:
+		m["p1$ddlGuoJia"] = match.guojiaMatch[1]
+		m["p1$ddlGuoJia$Value"] = m["p1$ddlGuoJia"]
+		m["p1$Address2"] = m["p1$ddlGuoJia"]
 	}
 	return m
 
@@ -252,7 +282,7 @@ func dayReport() (msg string) {
 			s = s[:right]
 		}
 	}
-	if (!strings.Contains(s, "提交成功")) {
+	if !strings.Contains(s, "提交成功") {
 		panic(s)
 	}
 	return s

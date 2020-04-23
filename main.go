@@ -184,8 +184,9 @@ func getViewParam() map[string]string {
 	html, _ := doc.Html()
 
 	match := NewMatch(html)
-
-	Riqi := time.Now().Format("2006-01-02")
+	
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	Riqi := time.Now().In(loc).Format("2006-01-02")
 	Tiwen := fmt.Sprintf("%.1f", float64(362+rand.Int()%3)/10)
 
 	F_State, area := generateFState(match, Riqi)

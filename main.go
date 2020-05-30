@@ -185,7 +185,10 @@ func getViewParam() map[string]string {
 
 	match := NewMatch(html)
 	
-	loc, _ := time.LoadLocation("Asia/Shanghai")
+	loc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		log.Fatal("Please install tzdata first: " + err.Error())
+	}
 	Riqi := time.Now().In(loc).Format("2006-01-02")
 	Tiwen := fmt.Sprintf("%.1f", float64(362+rand.Int()%3)/10)
 

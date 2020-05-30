@@ -134,17 +134,17 @@ type Match struct {
 
 func NewMatch(html string) (m *Match) {
 	m = new(Match)
-	m.zxMatch = regexp.MustCompile(`f8_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.gnMatch = regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.zxMatch = regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.gnMatch = regexp.MustCompile(`f20_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	//m.szMatch = regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.guojiaMatch = regexp.MustCompile(`f15_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.shengMatch = regexp.MustCompile(`f16_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.shiMatch = regexp.MustCompile(`f17_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.xianMatch = regexp.MustCompile(`f18_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.tzMatch = regexp.MustCompile(`f19_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.xxMatch = regexp.MustCompile(`f20_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	m.guojiaMatch = regexp.MustCompile(`f21_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shengMatch = regexp.MustCompile(`f22_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shiMatch = regexp.MustCompile(`f23_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.xianMatch = regexp.MustCompile(`f24_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.tzMatch = regexp.MustCompile(`f25_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.xxMatch = regexp.MustCompile(`f26_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
 	//m.jcMatch = regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.ssMatch = regexp.MustCompile(`f43_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.ssMatch = regexp.MustCompile(`f49_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	return
 }
 
@@ -236,6 +236,13 @@ func getViewParam() map[string]string {
 		"p1_SuiSMSM_Collapsed": "false",
 		"p1_GeLSM_Collapsed":   "false",
 		"p1_BanCSM_Collapsed":  "false",
+		"p1$GeLDZ":          "",
+		"p1$FanXRQ":         "",
+		"p1$WeiFHYY":        "",
+		"p1$ShangHJZD":      "",
+		"p1$QiuZZT":            "",
+		"p1$JiuYKN":            "",
+		"p1$JiuYSJ":            "",
 	}
 	switch area {
 	case AreaShanghai:

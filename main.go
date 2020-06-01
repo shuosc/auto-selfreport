@@ -134,17 +134,17 @@ type Match struct {
 
 func NewMatch(html string) (m *Match) {
 	m = new(Match)
-	m.zxMatch = regexp.MustCompile(`f14_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.gnMatch = regexp.MustCompile(`f20_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.zxMatch = regexp.MustCompile(`f19_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.gnMatch = regexp.MustCompile(`f25_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	//m.szMatch = regexp.MustCompile(`f9_state={.+?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.guojiaMatch = regexp.MustCompile(`f21_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.shengMatch = regexp.MustCompile(`f22_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.shiMatch = regexp.MustCompile(`f23_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.xianMatch = regexp.MustCompile(`f24_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.tzMatch = regexp.MustCompile(`f25_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
-	m.xxMatch = regexp.MustCompile(`f26_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
+	m.guojiaMatch = regexp.MustCompile(`f26_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shengMatch = regexp.MustCompile(`f27_state={.+?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.shiMatch = regexp.MustCompile(`f28_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.xianMatch = regexp.MustCompile(`f29_state={.*?"F_Items":(.+?),"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
+	m.tzMatch = regexp.MustCompile(`f30_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.xxMatch = regexp.MustCompile(`f31_state={.*?"Text":"(.+?)"`).FindStringSubmatch(html)
 	//m.jcMatch = regexp.MustCompile(`f15_state={.*?"SelectedValueArray":\["(.+?)"]`).FindStringSubmatch(html)
-	m.ssMatch = regexp.MustCompile(`f49_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
+	m.ssMatch = regexp.MustCompile(`f54_state={.*?"SelectedValue":"(.+?)"`).FindStringSubmatch(html)
 	return
 }
 

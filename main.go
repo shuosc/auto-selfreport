@@ -246,6 +246,7 @@ func getViewParam() map[string]string {
 		"p1$QiuZZT":            "",
 		"p1$JiuYKN":            "",
 		"p1$JiuYSJ":            "",
+		"p1$FengXDQDL":         "否",  // 过去14天是否在北京等中高风险地区逗留
 	}
 	switch area {
 	case AreaShanghai:

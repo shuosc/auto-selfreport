@@ -36,7 +36,7 @@ jobs:
 
 ```
 
-(The time of cron above is in UTC timezone)
+(The time of cron above is an UTC time)
 
 Then, add secrets at your own repository's <a href="../../settings/secrets">Settings-Secrets</a>
 
